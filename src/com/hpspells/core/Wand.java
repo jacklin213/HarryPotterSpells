@@ -1,12 +1,16 @@
 package com.hpspells.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.hpspells.core.util.MiscUtilities;
@@ -96,6 +100,59 @@ public class Wand {
         item.setTag(comp);*/
         return wand;
     }
+    
+    /**
+     * Attempts to get a wand from a players inventory.
+     * Calls the {@link #updateCurrentSpellLore(player, wand)} method.
+     * This method also updates the wand in the players inventory
+     * 
+     * @param player The player to update current spell with
+     * @param inv The players inventory
+     * @return the wand's ItemStack
+     */
+    public ItemStack getWand(Player player, PlayerInventory inv) {
+    	ItemStack wand = null;
+    	for (ItemStack is : inv.getContents()) {
+    		if (isWand(is)) {
+    			wand = is;
+    			inv.remove(is);
+    			if (wand != null) {
+    	    		wand = updateCurrentSpellLore(player, wand);
+    	    		inv.setItem(inv.firstEmpty(), wand);
+    	    	}
+    		}
+    	}
+    	return wand;
+    }
+    
+    /**
+     * Update's the current spell listed on the wand. This does not update
+     * the actual item in the players inventory. To do that call
+     * {@link #getWand(Player, PlayerInventory)}
+     * 
+     * If the wand does not have a lore it will create a lore
+     * containing the current spell
+     * 
+     * @param player The player
+     * @param wand The wand to update
+     * @return the updated wand ItemStack
+     */
+    public ItemStack updateCurrentSpellLore(Player player, ItemStack wand) {
+    	ItemMeta meta = wand.getItemMeta();
+    	if (!meta.hasLore()) {
+    		meta.setLore(Arrays.asList(ChatColor.GOLD + "Current-Spell: " + ChatColor.YELLOW + (player == null ? "None" : HPS.SpellManager.getCurrentSpell(player).getName())));
+    	} else {
+    		List<String> lore = meta.getLore();
+    		if (lore.get(0).contains("Current-Spell")) {
+    			lore.set(0, ChatColor.GOLD + "Current-Spell: " + ChatColor.YELLOW + (player == null ? "None" : HPS.SpellManager.getCurrentSpell(player).getName()));
+    		} else {
+    			lore.add(0, ChatColor.GOLD + "Current-Spell: " + ChatColor.YELLOW + (player == null ? "None" : HPS.SpellManager.getCurrentSpell(player).getName()));
+    		}
+    		meta.setLore(lore);
+    	}
+		wand.setItemMeta(meta);
+		return wand;
+    }
 
     /**
      * Gets a wand without lore.
@@ -122,7 +179,7 @@ public class Wand {
 
         return wand;
     }
-
+    
     private Object getConfig(String string, Object defaultt) {
         return HPS.getConfig().get("wand." + string, defaultt);
     }

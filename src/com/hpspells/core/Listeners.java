@@ -63,6 +63,8 @@ public class Listeners implements Listener {
                     HPS.PM.tell(e.getPlayer(), HPS.Localisation.getTranslation("genKnowNoSpells"));
                 } catch (NullPointerException er) {
                     PIE(e);
+                } finally {
+                	HPS.Wand.getWand(e.getPlayer(), e.getPlayer().getInventory());
                 }
 
                 return;
