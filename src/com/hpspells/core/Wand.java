@@ -60,11 +60,17 @@ public class Wand {
         //NBTTagCompound comp = new NBTTagCompound(TAG_NAME);
 
         if ((Boolean) getConfig("lore.enabled", true)) {
+        	Random random = new Random();
             ItemMeta meta = wand.getItemMeta();
-            Random random = new Random();
+            List<String> lore = new ArrayList<String>(Arrays.asList(
+        			ChatColor.GOLD + "Current-Spell: " + ChatColor.YELLOW + (owner == null ? "None" : HPS.SpellManager.getCurrentSpell(owner).getName()),
+        			WOOD_TYPES[random.nextInt(WOOD_TYPES.length)] + " wood",
+        			CORES[random.nextInt(CORES.length)] + " core",
+        			random.nextInt(20) + " inches long"
+        	));
 
-            meta.setDisplayName((String) getConfig("lore.name", "Wand"));
-            meta.setLore(Arrays.asList(WOOD_TYPES[random.nextInt(WOOD_TYPES.length)] + " wood", CORES[random.nextInt(CORES.length)] + " core", random.nextInt(20) + " inches long"));
+            meta.setDisplayName(ChatColor.RESET + "" + ChatColor.AQUA + (String) getConfig("lore.name", "Wand"));
+            meta.setLore(lore);
 
             wand.setItemMeta(meta);
         }
