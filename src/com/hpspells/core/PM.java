@@ -1,6 +1,12 @@
 package com.hpspells.core;
 
-import com.hpspells.core.spell.SpellNotification;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
@@ -8,8 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.hpspells.core.spell.SpellNotification;
 
 /**
  * PM stands for PluginMessenger. <br>
@@ -163,11 +168,16 @@ public class PM {
     }
 
     /**
-     * Prints the stack trace of an error to the console if debug mode is enabled
+     * Prints the stack trace of an error to the console if debug mode is enabled.
+     * <p>
+     * Calls {@link #writeToErrorLog(Throwable)} and logs error even if debug mode
+     * is disabled.
+     * </p>
      *
      * @param e the throwable
      */
     public void debug(Throwable e) {
+    	writeToErrorLog(e);
         if (HPS.getConfig().getBoolean("debug-mode", false))
             e.printStackTrace();
     }
@@ -211,6 +221,36 @@ public class PM {
         for (String message : messagesArray) {
             HPS.getServer().broadcastMessage(message);
         }
+    }
+    
+    /**
+     * Writes a throwable to an ERROR.log file in the root plugin folder
+     * and outputs an error to the console.
+     * 
+     * @param e The throwable to write
+     */
+    public void writeToErrorLog(Throwable e) {
+    	File errorLog = new File(HPS.getDataFolder(), "ERROR.log");
+    	if (!errorLog.exists()) {
+			try {
+				errorLog.createNewFile();
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		} else {
+			try {
+				PrintWriter out = new PrintWriter(new FileWriter(errorLog, true));
+				log.severe("#################################################");
+				log.severe("#################====[ERROR]====#################");
+				log.severe("             An error has been caught");
+				log.severe("Please check the ERROR.log file for more details.");
+				log.severe("#################====[ERROR]====#################");
+				log.severe("#################################################");
+				e.printStackTrace(out);
+			}catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
     }
 
 }
